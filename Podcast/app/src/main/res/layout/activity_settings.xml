@@ -1,0 +1,8 @@
+<fragment xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/userPreferenceFragment"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    class="br.ufpe.cin.if710.podcast.ui.SettingsActivity$FeedPreferenceFragment"
+    android:orientation="vertical" >
+
+</fragment>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:key="@+id/pref_screen">
+
+    <EditTextPreference
+        android:dialogTitle="@string/pref_title"
+        android:dialogMessage="@string/pref_msg"
+        android:key="feedlink"
+        android:negativeButtonText="@string/cancel"
+        android:positiveButtonText="@string/change"
+        android:title="@string/pref_desc"
+        android:defaultValue="@string/feed_link" />
+
+</PreferenceScreen>
