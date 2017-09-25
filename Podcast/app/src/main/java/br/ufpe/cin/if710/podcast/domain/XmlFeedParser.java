@@ -72,8 +72,9 @@ public class XmlFeedParser {
             if (name.equals("title")) {
                 title = readData(parser, "title");
             }
-            else if (name.equals("link")) {
-                link = readData(parser, "link");
+            // "guid" instead of "link"
+            else if (name.equals("guid")) {
+                link = readData(parser, "guid");
             }
             else if (name.equals("pubDate")) {
                 pubDate = readData(parser, "pubDate");
