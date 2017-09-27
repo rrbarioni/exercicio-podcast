@@ -108,6 +108,8 @@ public class MainActivity extends Activity {
 
                     Uri uri = getContentResolver().insert(PodcastProviderContract.EPISODE_LIST_URI, cv);
                 }
+
+                // print for checking items inside database
                 /*
                 Cursor queryCursor = getContentResolver().query(
                         PodcastProviderContract.EPISODE_LIST_URI,
