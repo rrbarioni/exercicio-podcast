@@ -64,29 +64,4 @@ public class PodcastDBHelper extends SQLiteOpenHelper {
         throw new RuntimeException("inutilizado");
     }
 
-    public void addItems(List<ItemFeed> items) {
-        SQLiteDatabase db_wd = db.getWritableDatabase();
-        ContentValues cv = new ContentValues();
-
-        for (ItemFeed item : items) {
-            cv.put(EPISODE_TITLE, item.getTitle());
-            cv.put(EPISODE_DATE, item.getPubDate());
-            cv.put(EPISODE_LINK, item.getLink());
-            cv.put(EPISODE_DESC, item.getDescription());
-            cv.put(EPISODE_DOWNLOAD_LINK, item.getDownloadLink());
-            cv.put(EPISODE_FILE_URI, "");
-
-            db_wd.insert(DATABASE_TABLE, null, cv);
-        }
-    }
-
-    public int getItemsAmount() {
-        SQLiteDatabase db_rd = db.getReadableDatabase();
-        Cursor c = db_rd.rawQuery("SELECT * FROM " + DATABASE_TABLE, null);
-
-        int itemsAmount = c.getCount();
-        c.close();
-
-        return itemsAmount;
-    }
 }
