@@ -1,6 +1,7 @@
 package br.ufpe.cin.if710.podcast.ui;
 
 import android.app.Activity;
+import android.content.ClipData;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
@@ -20,6 +21,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -110,7 +112,6 @@ public class MainActivity extends Activity {
                 }
 
                 // print for checking items inside database
-                /*
                 Cursor queryCursor = getContentResolver().query(
                         PodcastProviderContract.EPISODE_LIST_URI,
                         null, "", null, null
@@ -118,10 +119,9 @@ public class MainActivity extends Activity {
                 int n = 0;
                 while (queryCursor.moveToNext()) {
                     n++;
-                    Log.d("item " + n, queryCursor.getString(1));
+                    //Log.d("item " + n, queryCursor.getString(1));
                 }
-                */
-
+                Log.d("number of items", "" + n);
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (XmlPullParserException e) {
@@ -140,17 +140,20 @@ public class MainActivity extends Activity {
             //atualizar o list view
             items.setAdapter(adapter);
             items.setTextFilterEnabled(true);
-            /*
+
             items.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     XmlFeedAdapter adapter = (XmlFeedAdapter) parent.getAdapter();
                     ItemFeed item = adapter.getItem(position);
                     String msg = item.getTitle() + " " + item.getLink();
-                    Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
+
+                    Intent episode_detail_intent = new Intent(getApplicationContext(), EpisodeDetailActivity.class);
+                    episode_detail_intent.putExtra("item", item);
+                    startActivity(episode_detail_intent);
                 }
             });
-            /**/
         }
     }
 
