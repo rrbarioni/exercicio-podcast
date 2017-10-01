@@ -31,7 +31,7 @@ public class PodcastProvider extends ContentProvider {
     @Override
     public Uri insert(Uri uri, ContentValues values) {
         if (isEpisodeUri(uri)) {
-            long id = db.getWritableDatabase().insert(PodcastDBHelper.DATABASE_TABLE, null, values);
+            long id = db.getWritableDatabase().replace(PodcastDBHelper.DATABASE_TABLE, null, values);
             return Uri.withAppendedPath(PodcastProviderContract.EPISODE_LIST_URI, Long.toString(id));
         }
         else {
