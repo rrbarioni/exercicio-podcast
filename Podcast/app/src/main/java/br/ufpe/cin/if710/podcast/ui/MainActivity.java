@@ -3,8 +3,11 @@ package br.ufpe.cin.if710.podcast.ui;
 import android.app.Activity;
 import android.content.ClipData;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -77,7 +80,12 @@ public class MainActivity extends Activity {
     @Override
     protected void onStart() {
         super.onStart();
-        new DownloadXmlTask().execute(RSS_FEED);
+        if (internetConnection(getApplicationContext())) {
+            new DownloadXmlTask().execute(RSS_FEED);
+        }
+        else {
+            new GetFromDatabaseTask().execute();
+        }
     }
 
     @Override
@@ -87,10 +95,16 @@ public class MainActivity extends Activity {
         adapter.clear();
     }
 
+    public boolean internetConnection(Context c) {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(c.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
+        return (netInfo != null) && netInfo.isConnectedOrConnecting();
+    }
+
     private class DownloadXmlTask extends AsyncTask<String, Void, List<ItemFeed>> {
         @Override
         protected void onPreExecute() {
-            Toast.makeText(getApplicationContext(), "iniciando...", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), "iniciando... (temos internet!)", Toast.LENGTH_SHORT).show();
         }
 
         @Override
@@ -146,8 +160,57 @@ public class MainActivity extends Activity {
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     XmlFeedAdapter adapter = (XmlFeedAdapter) parent.getAdapter();
                     ItemFeed item = adapter.getItem(position);
-                    String msg = item.getTitle() + " " + item.getLink();
-                    //Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
+
+                    Intent episode_detail_intent = new Intent(getApplicationContext(), EpisodeDetailActivity.class);
+                    episode_detail_intent.putExtra("item", item);
+                    startActivity(episode_detail_intent);
+                }
+            });
+        }
+    }
+
+    private class GetFromDatabaseTask extends AsyncTask<String, Void, List<ItemFeed>> {
+        @Override
+        protected void onPreExecute() {
+            Toast.makeText(getApplicationContext(), "iniciando... (não temos internet!)", Toast.LENGTH_SHORT).show();
+        }
+
+        @Override
+        protected List<ItemFeed> doInBackground(String... params) {
+            List<ItemFeed> itemList = new ArrayList<>();
+
+            Cursor queryCursor = getContentResolver().query(
+                    PodcastProviderContract.EPISODE_LIST_URI,
+                    null, "", null, null
+            );
+            while (queryCursor.moveToNext()) {
+                String item_title = queryCursor.getString(queryCursor.getColumnIndex(PodcastProviderContract.TITLE));
+                String item_link = queryCursor.getString(queryCursor.getColumnIndex(PodcastProviderContract.EPISODE_LINK));
+                String item_date = queryCursor.getString(queryCursor.getColumnIndex(PodcastProviderContract.DATE));
+                String item_description = queryCursor.getString(queryCursor.getColumnIndex(PodcastProviderContract.DESCRIPTION));
+                String item_download_link = queryCursor.getString(queryCursor.getColumnIndex(PodcastProviderContract.DOWNLOAD_LINK));
+                itemList.add(new ItemFeed(item_title, item_link, item_date, item_description, item_download_link));
+            }
+
+            return itemList;
+        }
+
+        @Override
+        protected void onPostExecute(List<ItemFeed> feed) {
+            Toast.makeText(getApplicationContext(), "terminando...", Toast.LENGTH_SHORT).show();
+
+            //Adapter Personalizado
+            XmlFeedAdapter adapter = new XmlFeedAdapter(getApplicationContext(), R.layout.itemlista, feed);
+
+            //atualizar o list view
+            items.setAdapter(adapter);
+            items.setTextFilterEnabled(true);
+
+            items.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    XmlFeedAdapter adapter = (XmlFeedAdapter) parent.getAdapter();
+                    ItemFeed item = adapter.getItem(position);
 
                     Intent episode_detail_intent = new Intent(getApplicationContext(), EpisodeDetailActivity.class);
                     episode_detail_intent.putExtra("item", item);
