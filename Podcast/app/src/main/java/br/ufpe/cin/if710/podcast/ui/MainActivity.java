@@ -6,17 +6,23 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.xmlpull.v1.XmlPullParserException;
@@ -45,6 +51,7 @@ public class MainActivity extends Activity {
     //TODO teste com outros links de podcast
 
     private ListView items;
+    private Button selectedButton;
     private PodcastProvider pp;
 
     @Override
@@ -148,24 +155,11 @@ public class MainActivity extends Activity {
         protected void onPostExecute(List<ItemFeed> feed) {
             Toast.makeText(getApplicationContext(), "terminando...", Toast.LENGTH_SHORT).show();
 
-            //Adapter Personalizado
             XmlFeedAdapter adapter = new XmlFeedAdapter(getApplicationContext(), R.layout.itemlista, feed);
 
-            //atualizar o list view
             items.setAdapter(adapter);
             items.setTextFilterEnabled(true);
-
-            items.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    XmlFeedAdapter adapter = (XmlFeedAdapter) parent.getAdapter();
-                    ItemFeed item = adapter.getItem(position);
-
-                    Intent episode_detail_intent = new Intent(getApplicationContext(), EpisodeDetailActivity.class);
-                    episode_detail_intent.putExtra("item", item);
-                    startActivity(episode_detail_intent);
-                }
-            });
+//            setItemsListeners();
         }
     }
 
@@ -199,24 +193,11 @@ public class MainActivity extends Activity {
         protected void onPostExecute(List<ItemFeed> feed) {
             Toast.makeText(getApplicationContext(), "terminando...", Toast.LENGTH_SHORT).show();
 
-            //Adapter Personalizado
             XmlFeedAdapter adapter = new XmlFeedAdapter(getApplicationContext(), R.layout.itemlista, feed);
 
-            //atualizar o list view
             items.setAdapter(adapter);
             items.setTextFilterEnabled(true);
-
-            items.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    XmlFeedAdapter adapter = (XmlFeedAdapter) parent.getAdapter();
-                    ItemFeed item = adapter.getItem(position);
-
-                    Intent episode_detail_intent = new Intent(getApplicationContext(), EpisodeDetailActivity.class);
-                    episode_detail_intent.putExtra("item", item);
-                    startActivity(episode_detail_intent);
-                }
-            });
+//            setItemsListeners();
         }
     }
 

@@ -16,7 +16,6 @@ public class EpisodeDetailActivity extends Activity {
         setContentView(R.layout.activity_episode_detail);
 
         ItemFeed item = (ItemFeed) getIntent().getSerializableExtra("item");
-        Log.d("item title", item.getTitle());
 
         TextView item_title = findViewById(R.id.item_title);
         TextView item_link = findViewById(R.id.item_link);
