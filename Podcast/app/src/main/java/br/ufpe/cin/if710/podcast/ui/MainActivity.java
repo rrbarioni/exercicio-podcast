@@ -1,28 +1,22 @@
 package br.ufpe.cin.if710.podcast.ui;
 
+import android.Manifest;
 import android.app.Activity;
-import android.content.ClipData;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.LayoutInflater;
+import android.support.v4.app.ActivityCompat;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import org.xmlpull.v1.XmlPullParserException;
@@ -30,7 +24,6 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.Serializable;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -42,11 +35,17 @@ import br.ufpe.cin.if710.podcast.db.PodcastProvider;
 import br.ufpe.cin.if710.podcast.db.PodcastProviderContract;
 import br.ufpe.cin.if710.podcast.domain.ItemFeed;
 import br.ufpe.cin.if710.podcast.domain.XmlFeedParser;
-import br.ufpe.cin.if710.podcast.ui.adapter.XmlFeedAdapter;
+import br.ufpe.cin.if710.podcast.ui.adapter.ItemFeedAdapter;
 
 public class MainActivity extends Activity {
 
-    //ao fazer envio da resolucao, use este link no seu codigo!
+    // Storage Permissions
+    private static final int REQUEST_EXTERNAL_STORAGE = 1;
+    private static String[] PERMISSIONS_STORAGE = {
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
+    };
+
     private final String RSS_FEED = "http://leopoldomt.com/if710/fronteirasdaciencia.xml";
     //TODO teste com outros links de podcast
 
@@ -61,6 +60,8 @@ public class MainActivity extends Activity {
 
         items = (ListView) findViewById(R.id.items);
         pp = new PodcastProvider();
+
+        checkDownloadPodcastsPermissions(this);
     }
 
     @Override
@@ -87,6 +88,9 @@ public class MainActivity extends Activity {
     @Override
     protected void onStart() {
         super.onStart();
+
+        // Caso haja internet, pegar itens do XML da internet (conteúdo mais atualizado)
+        // Caso não haja internet, pegar itens do banco de dados
         if (internetConnection(getApplicationContext())) {
             new DownloadXmlTask().execute(RSS_FEED);
         }
@@ -98,27 +102,42 @@ public class MainActivity extends Activity {
     @Override
     protected void onStop() {
         super.onStop();
-        XmlFeedAdapter adapter = (XmlFeedAdapter) items.getAdapter();
+        ItemFeedAdapter adapter = (ItemFeedAdapter) items.getAdapter();
         adapter.clear();
     }
 
     public boolean internetConnection(Context c) {
+        // Checa se há conexão com a internet (não há teste de ping)
         ConnectivityManager cm = (ConnectivityManager) getSystemService(c.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = cm.getActiveNetworkInfo();
         return (netInfo != null) && netInfo.isConnectedOrConnecting();
     }
 
-    private class DownloadXmlTask extends AsyncTask<String, Void, List<ItemFeed>> {
+    public static void checkDownloadPodcastsPermissions(Activity activity) {
+        // Solicitar permissões para salvar arquivos no dispositivo
+        int permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
+        if (permission != PackageManager.PERMISSION_GRANTED) {
+            // We don't have permission so prompt the user
+            ActivityCompat.requestPermissions(
+                    activity,
+                    PERMISSIONS_STORAGE,
+                    REQUEST_EXTERNAL_STORAGE
+            );
+        }
+    }
+
+    private class DownloadXmlTask extends AsyncTask<String, Void, Void> {
         @Override
         protected void onPreExecute() {
-            Toast.makeText(getApplicationContext(), "iniciando... (temos internet!)", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), "Pegando lista de itens da internet", Toast.LENGTH_SHORT).show();
         }
 
         @Override
-        protected List<ItemFeed> doInBackground(String... params) {
-            List<ItemFeed> itemList = new ArrayList<>();
+        protected Void doInBackground(String... params) {
+            // Usar parser para extrair itens provenientes do XML e salvá-los no banco de dados
             try {
-                itemList = XmlFeedParser.parse(getRssFeed(params[0]));
+                List<ItemFeed> itemList = XmlFeedParser.parse(getRssFeed(params[0]));
                 for (ItemFeed item : itemList) {
                     ContentValues cv = new ContentValues();
 
@@ -129,48 +148,32 @@ public class MainActivity extends Activity {
                     cv.put(PodcastDBHelper.EPISODE_TITLE, item.getTitle());
                     cv.put(PodcastDBHelper.EPISODE_FILE_URI, "");
 
-                    Uri uri = getContentResolver().insert(PodcastProviderContract.EPISODE_LIST_URI, cv);
+                    getContentResolver().insert(PodcastProviderContract.EPISODE_LIST_URI, cv);
                 }
-
-                // print for checking items inside database
-                Cursor queryCursor = getContentResolver().query(
-                        PodcastProviderContract.EPISODE_LIST_URI,
-                        null, "", null, null
-                );
-                int n = 0;
-                while (queryCursor.moveToNext()) {
-                    n++;
-                    //Log.d("item " + n, queryCursor.getString(1));
-                }
-                Log.d("number of items", "" + n);
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (XmlPullParserException e) {
                 e.printStackTrace();
             }
-            return itemList;
+            return null;
         }
 
         @Override
-        protected void onPostExecute(List<ItemFeed> feed) {
-            Toast.makeText(getApplicationContext(), "terminando...", Toast.LENGTH_SHORT).show();
-
-            XmlFeedAdapter adapter = new XmlFeedAdapter(getApplicationContext(), R.layout.itemlista, feed);
-
-            items.setAdapter(adapter);
-            items.setTextFilterEnabled(true);
-//            setItemsListeners();
+        protected void onPostExecute(Void v) {
+            // Para listar elementos ao usuário, sempre pegar itens do banco de dados
+            new GetFromDatabaseTask().execute();
         }
     }
 
     private class GetFromDatabaseTask extends AsyncTask<String, Void, List<ItemFeed>> {
         @Override
         protected void onPreExecute() {
-            Toast.makeText(getApplicationContext(), "iniciando... (não temos internet!)", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), "Pegando itens do banco...", Toast.LENGTH_SHORT).show();
         }
 
         @Override
         protected List<ItemFeed> doInBackground(String... params) {
+            // Extrair todos os itens existentes no banco de dados
             List<ItemFeed> itemList = new ArrayList<>();
 
             Cursor queryCursor = getContentResolver().query(
@@ -191,13 +194,13 @@ public class MainActivity extends Activity {
 
         @Override
         protected void onPostExecute(List<ItemFeed> feed) {
-            Toast.makeText(getApplicationContext(), "terminando...", Toast.LENGTH_SHORT).show();
+            // Usar adapter para colocar lista de itens na view para o usuário
+            Toast.makeText(getApplicationContext(), "Itens pegos do banco", Toast.LENGTH_SHORT).show();
 
-            XmlFeedAdapter adapter = new XmlFeedAdapter(getApplicationContext(), R.layout.itemlista, feed);
+            ItemFeedAdapter adapter = new ItemFeedAdapter(getApplicationContext(), R.layout.itemlista, feed);
 
             items.setAdapter(adapter);
             items.setTextFilterEnabled(true);
-//            setItemsListeners();
         }
     }
 

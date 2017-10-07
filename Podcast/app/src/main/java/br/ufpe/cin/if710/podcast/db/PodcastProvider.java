@@ -13,7 +13,8 @@ public class PodcastProvider extends ContentProvider {
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
-        // returns the amount of deleted items
+        // Responsável por deletar itens do banco de dados
+        // Retorna a quantidade de itens deletados
         if (isEpisodeUri(uri)) {
             return db.getWritableDatabase().delete(PodcastDBHelper.DATABASE_TABLE, selection, selectionArgs);
         }
@@ -24,12 +25,12 @@ public class PodcastProvider extends ContentProvider {
 
     @Override
     public String getType(Uri uri) {
-        // at the given URI.
         throw new UnsupportedOperationException("Not yet implemented");
     }
 
     @Override
     public Uri insert(Uri uri, ContentValues values) {
+        // Responsável por inserir itens no banco de dados
         if (isEpisodeUri(uri)) {
             long id = db.getWritableDatabase().replace(PodcastDBHelper.DATABASE_TABLE, null, values);
             return Uri.withAppendedPath(PodcastProviderContract.EPISODE_LIST_URI, Long.toString(id));
@@ -48,6 +49,8 @@ public class PodcastProvider extends ContentProvider {
     @Override
     public Cursor query(Uri uri, String[] projection, String selection,
                         String[] selectionArgs, String sortOrder) {
+        // Responsável por fazer consultas ao banco de dados
+        // Retorna um cursor com os itens que satisfazem a consulta
         Cursor cursor = null;
         if (isEpisodeUri(uri)) {
             cursor = db.getReadableDatabase().query(PodcastDBHelper.DATABASE_TABLE, projection, selection, selectionArgs, null, null, sortOrder);
@@ -61,7 +64,8 @@ public class PodcastProvider extends ContentProvider {
     @Override
     public int update(Uri uri, ContentValues values, String selection,
                       String[] selectionArgs) {
-        // returns the amount of updated items
+        // Responsável por atualizar itens já existentes no banco de dados
+        // Retorna a quantidade de itens atualizados
         if (isEpisodeUri(uri)) {
             return db.getWritableDatabase().update(PodcastDBHelper.DATABASE_TABLE, values, selection, selectionArgs);
         }

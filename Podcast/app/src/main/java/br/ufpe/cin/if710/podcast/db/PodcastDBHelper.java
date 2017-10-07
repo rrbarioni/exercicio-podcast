@@ -42,6 +42,8 @@ public class PodcastDBHelper extends SQLiteOpenHelper {
             _ID, EPISODE_TITLE, EPISODE_DATE, EPISODE_LINK,
             EPISODE_DESC, EPISODE_DOWNLOAD_LINK, EPISODE_FILE_URI
     };
+
+    // Usar link do item como chave primária
     final private static String CREATE_CMD =
             "CREATE TABLE "+DATABASE_TABLE+" (" + _ID
                     + " INTEGER, "

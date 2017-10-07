@@ -15,8 +15,10 @@ public class EpisodeDetailActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_episode_detail);
 
+        // Extrair item salvo na intent
         ItemFeed item = (ItemFeed) getIntent().getSerializableExtra("item");
 
+        // TextViews para cada informação do item
         TextView item_title = findViewById(R.id.item_title);
         TextView item_link = findViewById(R.id.item_link);
         TextView item_date = findViewById(R.id.item_date);

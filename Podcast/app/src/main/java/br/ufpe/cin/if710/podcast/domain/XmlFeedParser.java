@@ -83,7 +83,6 @@ public class XmlFeedParser {
                 description = readData(parser, "description");
             }
             else if (name.equals("enclosure")) {
-                //TODO implementar resto do metodo para pegar atributo url da tag enclosure
                 downloadLink = readEnclosure(parser);
             }
             else {
@@ -118,7 +117,8 @@ public class XmlFeedParser {
             throws IOException, XmlPullParserException {
         parser.require(XmlPullParser.START_TAG, null, "enclosure");
         String data = parser.getAttributeValue(null, "url");
-        // "enclosure" é uma self-closing tag, não há necessidade de "require"
+
+        // Já que a tag "enclosure" é self-closing, não há necessidade de se realizar "require"
         parser.next();
         return data;
     }
