@@ -78,6 +78,17 @@ public class ItemFeedAdapter extends ArrayAdapter<ItemFeed> {
             // Ao clicar no botão de download de um item, realizar download do mesmo (usando DownloadPodcastService para tal)
             // Caso tal item já tenha sido baixado, dar o play
             holder.itemButton = convertView.findViewById(R.id.item_action);
+
+            if (("" + currentItem.getUri()) != "") {
+                Log.d("item " + position, "," + currentItem.getUri());
+                holder.itemButton.setEnabled(true);
+                holder.itemButton.setText("Ouvir");
+            }
+            else {
+                Log.d("item " + position, "," + currentItem.getUri());
+                holder.itemButton.setText("Baixar");
+            }
+
             holder.itemButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -92,6 +103,9 @@ public class ItemFeedAdapter extends ArrayAdapter<ItemFeed> {
                         download_podcast_service.putExtra("item", currentItem);
                         download_podcast_service.setData(Uri.parse(item_download_link));
                         context.startService(download_podcast_service);
+                    }
+                    // Executar o podcast
+                    else {
                     }
                 }
             });

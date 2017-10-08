@@ -3,6 +3,7 @@ package br.ufpe.cin.if710.podcast.db;
 import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 
 public class PodcastProvider extends ContentProvider {
@@ -29,10 +30,16 @@ public class PodcastProvider extends ContentProvider {
     }
 
     @Override
-    public Uri insert(Uri uri, ContentValues values) {
+    public Uri insert(Uri uri, ContentValues cv) {
         // Responsável por inserir itens no banco de dados
         if (isEpisodeUri(uri)) {
-            long id = db.getWritableDatabase().replace(PodcastDBHelper.DATABASE_TABLE, null, values);
+//            long id = db.getWritableDatabase().replace(PodcastDBHelper.DATABASE_TABLE, null, values);
+            int id = (int) db.getWritableDatabase().insertWithOnConflict(PodcastDBHelper.DATABASE_TABLE, null, cv, SQLiteDatabase.CONFLICT_IGNORE);
+            if (id == -1) {
+                String selection = PodcastProviderContract.EPISODE_LINK + " = ?";
+                String[] selection_args = new String[]{cv.getAsString(PodcastDBHelper.EPISODE_LINK)};
+                db.getWritableDatabase().update(PodcastDBHelper.DATABASE_TABLE, cv, selection, selection_args);
+            }
             return Uri.withAppendedPath(PodcastProviderContract.EPISODE_LIST_URI, Long.toString(id));
         }
         else {

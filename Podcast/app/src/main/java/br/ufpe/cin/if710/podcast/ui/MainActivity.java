@@ -19,6 +19,8 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.facebook.stetho.Stetho;
+
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.ByteArrayOutputStream;
@@ -61,6 +63,7 @@ public class MainActivity extends Activity {
         items = (ListView) findViewById(R.id.items);
         pp = new PodcastProvider();
 
+        Stetho.initializeWithDefaults(this);
         checkDownloadPodcastsPermissions(this);
     }
 
@@ -146,7 +149,7 @@ public class MainActivity extends Activity {
                     cv.put(PodcastDBHelper.EPISODE_DOWNLOAD_LINK, item.getDownloadLink());
                     cv.put(PodcastDBHelper.EPISODE_LINK, item.getLink());
                     cv.put(PodcastDBHelper.EPISODE_TITLE, item.getTitle());
-                    cv.put(PodcastDBHelper.EPISODE_FILE_URI, "");
+//                    cv.put(PodcastDBHelper.EPISODE_FILE_URI, item.getUri());
 
                     getContentResolver().insert(PodcastProviderContract.EPISODE_LIST_URI, cv);
                 }

@@ -46,7 +46,6 @@ public class DownloadPodcastService extends IntentService {
         ItemFeed item = (ItemFeed) i.getSerializableExtra("item");
 
         try {
-//            checar se tem permissao... Android 6.0+
             if (checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
 //                File root = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
                 File root = new File(Environment.getExternalStorageDirectory() + "/Podcasts");
@@ -84,25 +83,17 @@ public class DownloadPodcastService extends IntentService {
                     item.setUri(file_output.getPath());
 
                     ContentValues cv = new ContentValues();
-
-                    cv.put(PodcastDBHelper.EPISODE_DATE, item.getPubDate());
-                    cv.put(PodcastDBHelper.EPISODE_DESC, item.getDescription());
-                    cv.put(PodcastDBHelper.EPISODE_DOWNLOAD_LINK, item.getDownloadLink());
-                    cv.put(PodcastDBHelper.EPISODE_LINK, item.getLink());
-                    cv.put(PodcastDBHelper.EPISODE_TITLE, item.getTitle());
                     cv.put(PodcastDBHelper.EPISODE_FILE_URI, item.getUri());
 
-                    getContentResolver().update(PodcastProviderContract.EPISODE_LIST_URI, cv, "", null);
+                    String selection = PodcastProviderContract.EPISODE_LINK + " = ?";
+                    String[] selection_args = new String[]{item.getLink()};
+
+                    getContentResolver().update(PodcastProviderContract.EPISODE_LIST_URI, cv, selection, selection_args);
 
                     fos.getFD().sync();
                     out.close();
                     c.disconnect();
                 }
-
-                Log.d("download terminouintent", "s");
-//                Intent download_complete = new Intent(DOWNLOAD_COMPLETE);
-//                download_complete.putExtra("item_uri", )
-                LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(DOWNLOAD_COMPLETE));
             }else{
                 Toast.makeText(getApplicationContext(), "Conceda as premissões de armazenamento!", Toast.LENGTH_SHORT).show();
             }
