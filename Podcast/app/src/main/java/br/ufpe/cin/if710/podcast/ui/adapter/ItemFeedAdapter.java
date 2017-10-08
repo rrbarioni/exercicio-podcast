@@ -82,6 +82,7 @@ public class ItemFeedAdapter extends ArrayAdapter<ItemFeed> {
             holder.itemButton = convertView.findViewById(R.id.item_action);
 
             if (("" + currentItem.getUri()) != "") {
+//            if (currentItem.getUri() != null) {
                 holder.itemButton.setEnabled(true);
                 holder.itemButton.setText("Ouvir");
                 holder.itemButton.setBackgroundColor(Color.GREEN);
@@ -96,6 +97,7 @@ public class ItemFeedAdapter extends ArrayAdapter<ItemFeed> {
                 public void onClick(View view) {
                     // Realizar download do item, caso não tenha sido feito ainda (indicado pelo URI)
                     if (("" + currentItem.getUri()) == "") {
+//                    if (currentItem.getUri() == null) {
                         String item_download_link = currentItem.getDownloadLink();
                         Context context = getContext();
                         Intent download_podcast_service = new Intent(context, DownloadPodcastService.class);

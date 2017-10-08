@@ -33,7 +33,7 @@ public class PodcastProvider extends ContentProvider {
     public Uri insert(Uri uri, ContentValues cv) {
         // Responsável por inserir itens no banco de dados
         if (isEpisodeUri(uri)) {
-//            long id = db.getWritableDatabase().replace(PodcastDBHelper.DATABASE_TABLE, null, values);
+//            long id = db.getWritableDatabase().insert(PodcastDBHelper.DATABASE_TABLE, null, cv);
             int id = (int) db.getWritableDatabase().insertWithOnConflict(PodcastDBHelper.DATABASE_TABLE, null, cv, SQLiteDatabase.CONFLICT_IGNORE);
             if (id == -1) {
                 String selection = PodcastProviderContract.EPISODE_LINK + " = ?";

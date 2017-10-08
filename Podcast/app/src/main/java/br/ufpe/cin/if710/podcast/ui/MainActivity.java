@@ -13,6 +13,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
@@ -149,7 +150,7 @@ public class MainActivity extends Activity {
                     cv.put(PodcastDBHelper.EPISODE_DOWNLOAD_LINK, item.getDownloadLink());
                     cv.put(PodcastDBHelper.EPISODE_LINK, item.getLink());
                     cv.put(PodcastDBHelper.EPISODE_TITLE, item.getTitle());
-//                    cv.put(PodcastDBHelper.EPISODE_FILE_URI, item.getUri());
+                    cv.put(PodcastDBHelper.EPISODE_FILE_URI, item.getUri());
 
                     getContentResolver().insert(PodcastProviderContract.EPISODE_LIST_URI, cv);
                 }
