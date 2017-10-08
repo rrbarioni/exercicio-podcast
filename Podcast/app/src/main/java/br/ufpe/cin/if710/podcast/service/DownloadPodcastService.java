@@ -48,23 +48,25 @@ public class DownloadPodcastService extends IntentService {
         try {
             if (checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
 //                File root = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+                // Diretório de download é o root
                 File root = new File(Environment.getExternalStorageDirectory() + "/Podcasts");
 
                 root.mkdirs();
+                // Arquivo baixado é file_output
                 File file_output = new File(root, i.getData().getLastPathSegment());
 
+                // Caso o arquivo já exista, ele é deletado para ser baixado novamente
                 if (file_output.exists()) {
                     file_output.delete();
                 }
 
-                Log.d("file path", i.getData().toString());
+                // Conexão
                 URL url = new URL(i.getData().toString());
                 HttpURLConnection c = (HttpURLConnection) url.openConnection();
-                Log.d("output path", file_output.getPath());
                 FileOutputStream fos = new FileOutputStream(file_output.getPath());
                 BufferedOutputStream out = new BufferedOutputStream(fos);
                 try {
-                    Log.d("começando a baixar", "s");
+                    Log.d("Começando download", "Issae");
                     InputStream in = c.getInputStream();
                     byte[] buffer = new byte[8192];
                     int len = 0;
@@ -72,16 +74,17 @@ public class DownloadPodcastService extends IntentService {
                     while ((len = in.read(buffer)) >= 0) {
                         out.write(buffer, 0, len);
                         if (count % 100 == 0) {
-                            Log.d("baixando", "" + count);
+                            Log.d("Downloading podcast", "Buffer " + count);
                         }
                         count++;
                     }
                     out.flush();
                 }
                 finally {
-                    Log.d("download terminou", "s");
+                    Log.d("Fim de download", "Issae");
                     item.setUri(file_output.getPath());
 
+                    // Atualizar URI do podcast baixado (no banco de dados)
                     ContentValues cv = new ContentValues();
                     cv.put(PodcastDBHelper.EPISODE_FILE_URI, item.getUri());
 

@@ -7,6 +7,8 @@ package br.ufpe.cin.if710.podcast.ui.adapter;
 import java.util.List;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.util.Log;
 import android.view.View;
@@ -14,7 +16,6 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import br.ufpe.cin.if710.podcast.R;
 import br.ufpe.cin.if710.podcast.domain.ItemFeed;
@@ -61,13 +62,14 @@ public class ItemFeedAdapter extends ArrayAdapter<ItemFeed> {
         TextView item_title;
         TextView item_date;
         Button itemButton;
+        MediaPlayer media_player;
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         final ItemFeed currentItem = getItem(position);
 
-        ViewHolder holder;
+        final ViewHolder holder;
         if (convertView == null) {
             convertView = View.inflate(getContext(), linkResource, null);
             holder = new ViewHolder();
@@ -80,13 +82,13 @@ public class ItemFeedAdapter extends ArrayAdapter<ItemFeed> {
             holder.itemButton = convertView.findViewById(R.id.item_action);
 
             if (("" + currentItem.getUri()) != "") {
-                Log.d("item " + position, "," + currentItem.getUri());
                 holder.itemButton.setEnabled(true);
                 holder.itemButton.setText("Ouvir");
+                holder.itemButton.setBackgroundColor(Color.GREEN);
             }
             else {
-                Log.d("item " + position, "," + currentItem.getUri());
                 holder.itemButton.setText("Baixar");
+                holder.itemButton.setBackgroundColor(Color.RED);
             }
 
             holder.itemButton.setOnClickListener(new View.OnClickListener() {
@@ -94,18 +96,41 @@ public class ItemFeedAdapter extends ArrayAdapter<ItemFeed> {
                 public void onClick(View view) {
                     // Realizar download do item, caso não tenha sido feito ainda (indicado pelo URI)
                     if (("" + currentItem.getUri()) == "") {
-//                        Log.d("item link", "eae" + currentItem.getUri() + "men");
-                        ((Button)view).setEnabled(false);
                         String item_download_link = currentItem.getDownloadLink();
-                        ((Button)view).setText("Baixando");
                         Context context = getContext();
                         Intent download_podcast_service = new Intent(context, DownloadPodcastService.class);
                         download_podcast_service.putExtra("item", currentItem);
                         download_podcast_service.setData(Uri.parse(item_download_link));
+                        ((Button)view).setEnabled(false);
+                        ((Button)view).setText("Baixando");
+                        ((Button)view).setBackgroundColor(Color.BLUE);
                         context.startService(download_podcast_service);
                     }
-                    // Executar o podcast
+
+                    // Podcast já está na base de dados, pronto pra ser tocado (ou pausado)
                     else {
+                        Uri item_uri = Uri.parse(currentItem.getUri());
+
+                        // Caso podcast esteja pausado
+                        if (((Button)view).getText() == "Ouvir") {
+
+                            // Caso podcast não tenha começado
+                            if (holder.media_player == null) {
+                                holder.media_player = MediaPlayer.create(getContext(), item_uri);
+                                holder.media_player.setLooping(false);
+                            }
+                            // Tocar podcast
+                            holder.media_player.start();
+                            ((Button)view).setText("Pausar");
+                            ((Button)view).setBackgroundColor(Color.GRAY);
+                        }
+
+                        else if (((Button)view).getText() == "Pausar") {
+                            // Pausar podcast
+                            holder.media_player.pause();
+                            ((Button)view).setText("Ouvir");
+                            ((Button)view).setBackgroundColor(Color.GREEN);
+                        }
                     }
                 }
             });
