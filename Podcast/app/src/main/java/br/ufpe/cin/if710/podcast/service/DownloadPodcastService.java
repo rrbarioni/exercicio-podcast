@@ -25,6 +25,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 
+import javax.net.ssl.HttpsURLConnection;
+
 import br.ufpe.cin.if710.podcast.db.PodcastDBHelper;
 import br.ufpe.cin.if710.podcast.db.PodcastProviderContract;
 import br.ufpe.cin.if710.podcast.domain.ItemFeed;
@@ -63,8 +65,10 @@ public class DownloadPodcastService extends IntentService {
                 // Conexão
                 URL url = new URL(i.getData().toString());
                 HttpURLConnection c = (HttpURLConnection) url.openConnection();
+//                HttpsURLConnection c = (HttpsURLConnection) url.openConnection();
                 FileOutputStream fos = new FileOutputStream(file_output.getPath());
                 BufferedOutputStream out = new BufferedOutputStream(fos);
+//                Log.d("start podcast service", "FileOutputStream");
                 try {
                     Log.d("Começando download", "Issae");
                     InputStream in = c.getInputStream();

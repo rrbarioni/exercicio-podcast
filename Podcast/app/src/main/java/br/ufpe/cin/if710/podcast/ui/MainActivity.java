@@ -32,6 +32,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.net.ssl.HttpsURLConnection;
+
 import br.ufpe.cin.if710.podcast.R;
 import br.ufpe.cin.if710.podcast.db.PodcastDBHelper;
 import br.ufpe.cin.if710.podcast.db.PodcastProvider;
@@ -51,6 +53,7 @@ public class MainActivity extends Activity {
 
     private final String RSS_FEED = "http://leopoldomt.com/if710/fronteirasdaciencia.xml";
     //TODO teste com outros links de podcast
+//    private final String RSS_FEED = "https://hpbl.github.io/hub42_APS/audio/xml_reduzido.xml";
 
     private ListView items;
     private Button selectedButton;
@@ -191,6 +194,7 @@ public class MainActivity extends Activity {
                 String item_description = queryCursor.getString(queryCursor.getColumnIndex(PodcastProviderContract.DESCRIPTION));
                 String item_download_link = queryCursor.getString(queryCursor.getColumnIndex(PodcastProviderContract.DOWNLOAD_LINK));
                 String item_uri = queryCursor.getString(queryCursor.getColumnIndex(PodcastProviderContract.EPISODE_URI));
+
                 itemList.add(new ItemFeed(item_title, item_link, item_date, item_description, item_download_link, item_uri));
             }
 
@@ -216,6 +220,7 @@ public class MainActivity extends Activity {
         try {
             URL url = new URL(feed);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+//            HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
             in = conn.getInputStream();
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             byte[] buffer = new byte[1024];

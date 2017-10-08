@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -81,8 +82,8 @@ public class ItemFeedAdapter extends ArrayAdapter<ItemFeed> {
             // Caso tal item já tenha sido baixado, dar o play
             holder.itemButton = convertView.findViewById(R.id.item_action);
 
-            if (("" + currentItem.getUri()) != "") {
-//            if (currentItem.getUri() != null) {
+            Log.d("getUri", currentItem.getUri());
+            if (!(currentItem.getUri()).equals("NONE")) {
                 holder.itemButton.setEnabled(true);
                 holder.itemButton.setText("Ouvir");
                 holder.itemButton.setBackgroundColor(Color.GREEN);
@@ -96,8 +97,7 @@ public class ItemFeedAdapter extends ArrayAdapter<ItemFeed> {
                 @Override
                 public void onClick(View view) {
                     // Realizar download do item, caso não tenha sido feito ainda (indicado pelo URI)
-                    if (("" + currentItem.getUri()) == "") {
-//                    if (currentItem.getUri() == null) {
+                    if ((currentItem.getUri()).equals("NONE")) {
                         String item_download_link = currentItem.getDownloadLink();
                         Context context = getContext();
                         Intent download_podcast_service = new Intent(context, DownloadPodcastService.class);

@@ -16,7 +16,7 @@ public class ItemFeed implements Serializable {
         this.pubDate = pubDate;
         this.description = description;
         this.downloadLink = downloadLink;
-        this.uri = "";
+        this.uri = "NONE";
     }
 
     public ItemFeed(String title, String link, String pubDate, String description, String downloadLink, String uri) {
