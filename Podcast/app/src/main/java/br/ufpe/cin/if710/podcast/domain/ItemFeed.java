@@ -8,7 +8,7 @@ public class ItemFeed implements Serializable {
     private final String pubDate;
     private final String description;
     private final String downloadLink;
-
+    private String uri;
 
     public ItemFeed(String title, String link, String pubDate, String description, String downloadLink) {
         this.title = title;
@@ -16,6 +16,16 @@ public class ItemFeed implements Serializable {
         this.pubDate = pubDate;
         this.description = description;
         this.downloadLink = downloadLink;
+        this.uri = "";
+    }
+
+    public ItemFeed(String title, String link, String pubDate, String description, String downloadLink, String uri) {
+        this.title = title;
+        this.link = link;
+        this.pubDate = pubDate;
+        this.description = description;
+        this.downloadLink = downloadLink;
+        this.uri = uri;
     }
 
     public String getTitle() {
@@ -37,6 +47,12 @@ public class ItemFeed implements Serializable {
     public String getDownloadLink() {
         return downloadLink;
     }
+
+    public String getUri() {
+        return uri;
+    }
+
+    public void setUri(String uri) { this.uri = uri; }
 
     @Override
     public String toString() {

@@ -24,7 +24,6 @@ import br.ufpe.cin.if710.podcast.ui.EpisodeDetailActivity;
 public class ItemFeedAdapter extends ArrayAdapter<ItemFeed> {
 
     int linkResource;
-    Button itemButton;
 
     public ItemFeedAdapter(Context context, int resource, List<ItemFeed> objects) {
         super(context, resource, objects);
@@ -61,6 +60,7 @@ public class ItemFeedAdapter extends ArrayAdapter<ItemFeed> {
     static class ViewHolder {
         TextView item_title;
         TextView item_date;
+        Button itemButton;
     }
 
     @Override
@@ -77,16 +77,22 @@ public class ItemFeedAdapter extends ArrayAdapter<ItemFeed> {
 
             // Ao clicar no botão de download de um item, realizar download do mesmo (usando DownloadPodcastService para tal)
             // Caso tal item já tenha sido baixado, dar o play
-            itemButton = convertView.findViewById(R.id.item_action);
-            itemButton.setOnClickListener(new View.OnClickListener() {
+            holder.itemButton = convertView.findViewById(R.id.item_action);
+            holder.itemButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    itemButton.setEnabled(false);
-                    String item_download_link = currentItem.getDownloadLink();
-                    Context context = getContext();
-                    Intent download_podcast_service = new Intent(context, DownloadPodcastService.class);
-                    download_podcast_service.setData(Uri.parse(item_download_link));
-                    context.startService(download_podcast_service);
+                    // Realizar download do item, caso não tenha sido feito ainda (indicado pelo URI)
+                    if (("" + currentItem.getUri()) == "") {
+//                        Log.d("item link", "eae" + currentItem.getUri() + "men");
+                        ((Button)view).setEnabled(false);
+                        String item_download_link = currentItem.getDownloadLink();
+                        ((Button)view).setText("Baixando");
+                        Context context = getContext();
+                        Intent download_podcast_service = new Intent(context, DownloadPodcastService.class);
+                        download_podcast_service.putExtra("item", currentItem);
+                        download_podcast_service.setData(Uri.parse(item_download_link));
+                        context.startService(download_podcast_service);
+                    }
                 }
             });
         } else {
