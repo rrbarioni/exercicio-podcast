@@ -32,6 +32,7 @@
         <activity android:name=".ui.EpisodeDetailActivity"></activity>
 
         <service android:name=".service.DownloadPodcastService" />
+        <service android:name=".service.DownloadXMLService" />
     </application>
 
 </manifest>

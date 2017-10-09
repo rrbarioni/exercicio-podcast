@@ -5,6 +5,8 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
+import android.widget.Toast;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -15,6 +17,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.net.ssl.HttpsURLConnection;
 
 import br.ufpe.cin.if710.podcast.db.PodcastDBHelper;
 import br.ufpe.cin.if710.podcast.db.PodcastProviderContract;
@@ -28,18 +32,16 @@ import br.ufpe.cin.if710.podcast.domain.XmlFeedParser;
 public class DownloadXMLService extends IntentService {
     public static final String DOWNLOAD_AND_PERSIST_XML_COMPLETE = "br.ufpe.cin.if710.services.action.DOWNLOAD_AND_PERSIST_XML_COMPLETE";
 
-    public DownloadXMLService(String name) {
-        super(name);
-    }
+    public DownloadXMLService() { super("DownloadXMLService"); }
 
     @Override
-    protected void onHandleIntent(@Nullable Intent intent) {
+    public void onHandleIntent(Intent intent) {
         String RSS_FEED = intent.getStringExtra("rss_feed");
         List<ItemFeed> itemList = new ArrayList<>();
         try {
+            // Usar parser para extrair itens provenientes do XML e salvá-los no banco de dados
             itemList = XmlFeedParser.parse(getRssFeed(RSS_FEED));
-
-            } catch (XmlPullParserException e1) {
+        } catch (XmlPullParserException e1) {
             e1.printStackTrace();
         } catch (IOException e1) {
             e1.printStackTrace();
@@ -67,8 +69,8 @@ public class DownloadXMLService extends IntentService {
         String rssFeed = "";
         try {
             URL url = new URL(feed);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-//            HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
+//            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
             in = conn.getInputStream();
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             byte[] buffer = new byte[1024];

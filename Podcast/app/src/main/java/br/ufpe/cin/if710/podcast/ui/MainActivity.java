@@ -66,7 +66,6 @@ public class MainActivity extends Activity {
     private Button selectedButton;
     private PodcastProvider pp;
 
-    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -77,8 +76,8 @@ public class MainActivity extends Activity {
 
         Stetho.initializeWithDefaults(this);
 
-//        IntentFilter download_xml = new IntentFilter(DownloadXMLService.DOWNLOAD_AND_PERSIST_XML_COMPLETE);
-//        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(onDownloadXMLEvent, download_xml);
+        IntentFilter download_xml = new IntentFilter(DownloadXMLService.DOWNLOAD_AND_PERSIST_XML_COMPLETE);
+        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(onDownloadXMLEvent, download_xml);
     }
 
     @Override
@@ -111,11 +110,12 @@ public class MainActivity extends Activity {
 
         // Caso haja internet, pegar itens do XML da internet (conteúdo mais atualizado)
         // Caso não haja internet, pegar itens do banco de dados
+        // Agora é feito pelo DownloadXMLService
         if (internetConnection(getApplicationContext())) {
-            new DownloadXmlTask().execute(RSS_FEED);
-//            Intent download_xml_service = new Intent(getApplicationContext(), DownloadXMLService.class);
-//            download_xml_service.putExtra("rss_feed", RSS_FEED);
-//            getApplicationContext().startService(download_xml_service);
+//            new DownloadXmlTask().execute(RSS_FEED);
+            Intent download_xml_service = new Intent(this.getApplicationContext(), DownloadXMLService.class);
+            download_xml_service.putExtra("rss_feed", RSS_FEED);
+            this.getApplicationContext().startService(download_xml_service);
         }
         else {
             new GetFromDatabaseTask().execute();
@@ -150,43 +150,43 @@ public class MainActivity extends Activity {
         }
     }
 
-    private class DownloadXmlTask extends AsyncTask<String, Void, Void> {
-        @Override
-        protected void onPreExecute() {
-            Toast.makeText(getApplicationContext(), "Pegando lista de itens da internet", Toast.LENGTH_SHORT).show();
-        }
-
-        @Override
-        protected Void doInBackground(String... params) {
-            // Usar parser para extrair itens provenientes do XML e salvá-los no banco de dados
-            try {
-                List<ItemFeed> itemList = XmlFeedParser.parse(getRssFeed(params[0]));
-                for (ItemFeed item : itemList) {
-                    ContentValues cv = new ContentValues();
-
-                    cv.put(PodcastDBHelper.EPISODE_DATE, item.getPubDate());
-                    cv.put(PodcastDBHelper.EPISODE_DESC, item.getDescription());
-                    cv.put(PodcastDBHelper.EPISODE_DOWNLOAD_LINK, item.getDownloadLink());
-                    cv.put(PodcastDBHelper.EPISODE_LINK, item.getLink());
-                    cv.put(PodcastDBHelper.EPISODE_TITLE, item.getTitle());
-//                    cv.put(PodcastDBHelper.EPISODE_FILE_URI, item.getUri());
-
-                    getContentResolver().insert(PodcastProviderContract.EPISODE_LIST_URI, cv);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (XmlPullParserException e) {
-                e.printStackTrace();
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void v) {
-            // Para listar elementos ao usuário, sempre pegar itens do banco de dados
-            new GetFromDatabaseTask().execute();
-        }
-    }
+//    private class DownloadXmlTask extends AsyncTask<String, Void, Void> {
+//        @Override
+//        protected void onPreExecute() {
+//            Toast.makeText(getApplicationContext(), "Pegando lista de itens da internet", Toast.LENGTH_SHORT).show();
+//        }
+//
+//        @Override
+//        protected Void doInBackground(String... params) {
+//            // Usar parser para extrair itens provenientes do XML e salvá-los no banco de dados
+//            try {
+//                List<ItemFeed> itemList = XmlFeedParser.parse(getRssFeed(params[0]));
+//                for (ItemFeed item : itemList) {
+//                    ContentValues cv = new ContentValues();
+//
+//                    cv.put(PodcastDBHelper.EPISODE_DATE, item.getPubDate());
+//                    cv.put(PodcastDBHelper.EPISODE_DESC, item.getDescription());
+//                    cv.put(PodcastDBHelper.EPISODE_DOWNLOAD_LINK, item.getDownloadLink());
+//                    cv.put(PodcastDBHelper.EPISODE_LINK, item.getLink());
+//                    cv.put(PodcastDBHelper.EPISODE_TITLE, item.getTitle());
+////                    cv.put(PodcastDBHelper.EPISODE_FILE_URI, item.getUri());
+//
+//                    getContentResolver().insert(PodcastProviderContract.EPISODE_LIST_URI, cv);
+//                }
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            } catch (XmlPullParserException e) {
+//                e.printStackTrace();
+//            }
+//            return null;
+//        }
+//
+//        @Override
+//        protected void onPostExecute(Void v) {
+//            // Para listar elementos ao usuário, sempre pegar itens do banco de dados
+//            new GetFromDatabaseTask().execute();
+//        }
+//    }
 
     private class GetFromDatabaseTask extends AsyncTask<String, Void, List<ItemFeed>> {
         @Override
@@ -255,11 +255,13 @@ public class MainActivity extends Activity {
         return rssFeed;
     }
 
-//    private BroadcastReceiver onDownloadXMLEvent = new BroadcastReceiver() {
-//
-//        @Override
-//        public void onReceive(Context context, Intent intent) {
-//            new GetFromDatabaseTask().execute();
-//        }
-//    };
+    private BroadcastReceiver onDownloadXMLEvent = new BroadcastReceiver() {
+        public void onReceive(Context context, Intent intent) {
+            // Chamado quando o DownloadXMLService retorna com o XML baixado e colocado no banco de dados
+            Toast.makeText(getApplicationContext(), "Itens carregados do XML pelo service", Toast.LENGTH_SHORT).show();
+
+            // Carregar view com os dados do banco
+            new GetFromDatabaseTask().execute();
+        }
+    };
 }

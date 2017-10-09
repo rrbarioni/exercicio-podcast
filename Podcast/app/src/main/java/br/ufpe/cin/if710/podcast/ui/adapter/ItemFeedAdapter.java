@@ -138,6 +138,7 @@ public class ItemFeedAdapter extends ArrayAdapter<ItemFeed> {
                                 holder.media_player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                                     public void onCompletion(MediaPlayer mp) {
                                         ((Button)view).setText("Ouvir");
+                                        ((Button)view).setBackgroundColor(Color.GREEN);
                                     }
                                 });
                             }
