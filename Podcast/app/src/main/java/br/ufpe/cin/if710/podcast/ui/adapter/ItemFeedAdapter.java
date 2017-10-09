@@ -9,6 +9,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.media.MediaPlayer;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
@@ -17,6 +19,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import br.ufpe.cin.if710.podcast.R;
 import br.ufpe.cin.if710.podcast.domain.ItemFeed;
@@ -26,6 +29,13 @@ import br.ufpe.cin.if710.podcast.ui.EpisodeDetailActivity;
 public class ItemFeedAdapter extends ArrayAdapter<ItemFeed> {
 
     int linkResource;
+
+    public boolean internetConnection(Context c) {
+        // Checa se há conexão com a internet (não há teste de ping)
+        ConnectivityManager cm = (ConnectivityManager) c.getSystemService(c.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
+        return (netInfo != null) && netInfo.isConnectedOrConnecting();
+    }
 
     public ItemFeedAdapter(Context context, int resource, List<ItemFeed> objects) {
         super(context, resource, objects);
@@ -100,13 +110,18 @@ public class ItemFeedAdapter extends ArrayAdapter<ItemFeed> {
                     if ((currentItem.getUri()).equals("NONE")) {
                         String item_download_link = currentItem.getDownloadLink();
                         Context context = getContext();
-                        Intent download_podcast_service = new Intent(context, DownloadPodcastService.class);
-                        download_podcast_service.putExtra("item", currentItem);
-                        download_podcast_service.setData(Uri.parse(item_download_link));
-                        ((Button)view).setEnabled(false);
-                        ((Button)view).setText("Baixando");
-                        ((Button)view).setBackgroundColor(Color.BLUE);
-                        context.startService(download_podcast_service);
+                        if (internetConnection(context)) {
+                            Intent download_podcast_service = new Intent(context, DownloadPodcastService.class);
+                            download_podcast_service.putExtra("item", currentItem);
+                            download_podcast_service.setData(Uri.parse(item_download_link));
+                            ((Button)view).setEnabled(false);
+                            ((Button)view).setText("Baixando");
+                            ((Button)view).setBackgroundColor(Color.BLUE);
+                            context.startService(download_podcast_service);
+                        }
+                        else {
+                            Toast.makeText(context, "Não há conexão com a internet.", Toast.LENGTH_SHORT).show();
+                        }
                     }
 
                     // Podcast já está na base de dados, pronto pra ser tocado (ou pausado)

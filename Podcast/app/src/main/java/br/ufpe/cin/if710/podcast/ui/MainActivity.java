@@ -2,9 +2,11 @@ package br.ufpe.cin.if710.podcast.ui;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
@@ -13,6 +15,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -40,6 +43,7 @@ import br.ufpe.cin.if710.podcast.db.PodcastProvider;
 import br.ufpe.cin.if710.podcast.db.PodcastProviderContract;
 import br.ufpe.cin.if710.podcast.domain.ItemFeed;
 import br.ufpe.cin.if710.podcast.domain.XmlFeedParser;
+import br.ufpe.cin.if710.podcast.service.DownloadXMLService;
 import br.ufpe.cin.if710.podcast.ui.adapter.ItemFeedAdapter;
 
 public class MainActivity extends Activity {
@@ -69,6 +73,9 @@ public class MainActivity extends Activity {
 
         Stetho.initializeWithDefaults(this);
         checkDownloadPodcastsPermissions(this);
+
+//        IntentFilter download_xml = new IntentFilter(DownloadXMLService.DOWNLOAD_AND_PERSIST_XML_COMPLETE);
+//        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(onDownloadXMLEvent, download_xml);
     }
 
     @Override
@@ -100,6 +107,9 @@ public class MainActivity extends Activity {
         // Caso não haja internet, pegar itens do banco de dados
         if (internetConnection(getApplicationContext())) {
             new DownloadXmlTask().execute(RSS_FEED);
+//            Intent download_xml_service = new Intent(getApplicationContext(), DownloadXMLService.class);
+//            download_xml_service.putExtra("rss_feed", RSS_FEED);
+//            getApplicationContext().startService(download_xml_service);
         }
         else {
             new GetFromDatabaseTask().execute();
@@ -153,7 +163,7 @@ public class MainActivity extends Activity {
                     cv.put(PodcastDBHelper.EPISODE_DOWNLOAD_LINK, item.getDownloadLink());
                     cv.put(PodcastDBHelper.EPISODE_LINK, item.getLink());
                     cv.put(PodcastDBHelper.EPISODE_TITLE, item.getTitle());
-                    cv.put(PodcastDBHelper.EPISODE_FILE_URI, item.getUri());
+//                    cv.put(PodcastDBHelper.EPISODE_FILE_URI, item.getUri());
 
                     getContentResolver().insert(PodcastProviderContract.EPISODE_LIST_URI, cv);
                 }
@@ -187,6 +197,7 @@ public class MainActivity extends Activity {
                     PodcastProviderContract.EPISODE_LIST_URI,
                     null, "", null, null
             );
+//            int count = 0;
             while (queryCursor.moveToNext()) {
                 String item_title = queryCursor.getString(queryCursor.getColumnIndex(PodcastProviderContract.TITLE));
                 String item_link = queryCursor.getString(queryCursor.getColumnIndex(PodcastProviderContract.EPISODE_LINK));
@@ -194,10 +205,10 @@ public class MainActivity extends Activity {
                 String item_description = queryCursor.getString(queryCursor.getColumnIndex(PodcastProviderContract.DESCRIPTION));
                 String item_download_link = queryCursor.getString(queryCursor.getColumnIndex(PodcastProviderContract.DOWNLOAD_LINK));
                 String item_uri = queryCursor.getString(queryCursor.getColumnIndex(PodcastProviderContract.EPISODE_URI));
-
+//                count++;
                 itemList.add(new ItemFeed(item_title, item_link, item_date, item_description, item_download_link, item_uri));
             }
-
+//            Log.d("count", "" + count);
             return itemList;
         }
 
@@ -236,4 +247,12 @@ public class MainActivity extends Activity {
         }
         return rssFeed;
     }
+
+//    private BroadcastReceiver onDownloadXMLEvent = new BroadcastReceiver() {
+//
+//        @Override
+//        public void onReceive(Context context, Intent intent) {
+//            new GetFromDatabaseTask().execute();
+//        }
+//    };
 }
