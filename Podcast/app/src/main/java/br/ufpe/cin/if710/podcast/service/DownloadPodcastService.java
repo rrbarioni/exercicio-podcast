@@ -1,5 +1,6 @@
 package br.ufpe.cin.if710.podcast.service;
 
+import android.Manifest;
 import android.app.IntentService;
 import android.content.ContentValues;
 import android.content.Intent;
@@ -7,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Environment;
 import android.support.annotation.RequiresApi;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
@@ -46,7 +48,6 @@ public class DownloadPodcastService extends IntentService {
     @Override
     public void onHandleIntent(Intent i) {
         ItemFeed item = (ItemFeed) i.getSerializableExtra("item");
-
         try {
             if (checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
 //                File root = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
@@ -64,11 +65,11 @@ public class DownloadPodcastService extends IntentService {
 
                 // Conexão
                 URL url = new URL(i.getData().toString());
-                HttpURLConnection c = (HttpURLConnection) url.openConnection();
-//                HttpsURLConnection c = (HttpsURLConnection) url.openConnection();
+//                HttpURLConnection c = (HttpURLConnection) url.openConnection();
+                HttpsURLConnection c = (HttpsURLConnection) url.openConnection();
                 FileOutputStream fos = new FileOutputStream(file_output.getPath());
                 BufferedOutputStream out = new BufferedOutputStream(fos);
-//                Log.d("start podcast service", "FileOutputStream");
+                Log.d("start podcast service", "FileOutputStream");
                 try {
                     Log.d("Começando download", "Issae");
                     InputStream in = c.getInputStream();
@@ -102,7 +103,7 @@ public class DownloadPodcastService extends IntentService {
                     c.disconnect();
                 }
             }else{
-                Toast.makeText(getApplicationContext(), "Conceda as premissões de armazenamento!", Toast.LENGTH_SHORT).show();
+                Log.d("s", "Conceda as permissões de armazenamento!");
             }
 
         } catch (IOException e) {

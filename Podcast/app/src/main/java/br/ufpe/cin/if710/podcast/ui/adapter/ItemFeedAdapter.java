@@ -105,7 +105,7 @@ public class ItemFeedAdapter extends ArrayAdapter<ItemFeed> {
 
             holder.itemButton.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onClick(View view) {
+                public void onClick(final View view) {
                     // Realizar download do item, caso não tenha sido feito ainda (indicado pelo URI)
                     if ((currentItem.getUri()).equals("NONE")) {
                         String item_download_link = currentItem.getDownloadLink();
@@ -135,6 +135,11 @@ public class ItemFeedAdapter extends ArrayAdapter<ItemFeed> {
                             if (holder.media_player == null) {
                                 holder.media_player = MediaPlayer.create(getContext(), item_uri);
                                 holder.media_player.setLooping(false);
+                                holder.media_player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                                    public void onCompletion(MediaPlayer mp) {
+                                        ((Button)view).setText("Ouvir");
+                                    }
+                                });
                             }
                             // Tocar podcast
                             holder.media_player.start();

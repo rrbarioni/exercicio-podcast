@@ -13,8 +13,11 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.Menu;
@@ -55,14 +58,15 @@ public class MainActivity extends Activity {
             Manifest.permission.WRITE_EXTERNAL_STORAGE
     };
 
-    private final String RSS_FEED = "http://leopoldomt.com/if710/fronteirasdaciencia.xml";
+//    private final String RSS_FEED = "http://leopoldomt.com/if710/fronteirasdaciencia.xml";
     //TODO teste com outros links de podcast
-//    private final String RSS_FEED = "https://hpbl.github.io/hub42_APS/audio/xml_reduzido.xml";
+    private final String RSS_FEED = "https://hpbl.github.io/hub42_APS/audio/xml_reduzido.xml";
 
     private ListView items;
     private Button selectedButton;
     private PodcastProvider pp;
 
+    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,7 +76,6 @@ public class MainActivity extends Activity {
         pp = new PodcastProvider();
 
         Stetho.initializeWithDefaults(this);
-        checkDownloadPodcastsPermissions(this);
 
 //        IntentFilter download_xml = new IntentFilter(DownloadXMLService.DOWNLOAD_AND_PERSIST_XML_COMPLETE);
 //        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(onDownloadXMLEvent, download_xml);
@@ -102,6 +105,9 @@ public class MainActivity extends Activity {
     @Override
     protected void onStart() {
         super.onStart();
+
+        checkDownloadPodcastsPermissions(this);
+        while(ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {}
 
         // Caso haja internet, pegar itens do XML da internet (conteúdo mais atualizado)
         // Caso não haja internet, pegar itens do banco de dados
@@ -197,7 +203,7 @@ public class MainActivity extends Activity {
                     PodcastProviderContract.EPISODE_LIST_URI,
                     null, "", null, null
             );
-//            int count = 0;
+            int count = 0;
             while (queryCursor.moveToNext()) {
                 String item_title = queryCursor.getString(queryCursor.getColumnIndex(PodcastProviderContract.TITLE));
                 String item_link = queryCursor.getString(queryCursor.getColumnIndex(PodcastProviderContract.EPISODE_LINK));
@@ -205,10 +211,11 @@ public class MainActivity extends Activity {
                 String item_description = queryCursor.getString(queryCursor.getColumnIndex(PodcastProviderContract.DESCRIPTION));
                 String item_download_link = queryCursor.getString(queryCursor.getColumnIndex(PodcastProviderContract.DOWNLOAD_LINK));
                 String item_uri = queryCursor.getString(queryCursor.getColumnIndex(PodcastProviderContract.EPISODE_URI));
-//                count++;
+                count++;
                 itemList.add(new ItemFeed(item_title, item_link, item_date, item_description, item_download_link, item_uri));
             }
-//            Log.d("count", "" + count);
+            Log.d("count", "" + count);
+
             return itemList;
         }
 
@@ -230,8 +237,8 @@ public class MainActivity extends Activity {
         String rssFeed = "";
         try {
             URL url = new URL(feed);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-//            HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
+//            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
             in = conn.getInputStream();
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             byte[] buffer = new byte[1024];
