@@ -128,7 +128,7 @@ public class ItemFeedAdapter extends ArrayAdapter<ItemFeed> {
                     else {
                         Uri item_uri = Uri.parse(currentItem.getUri());
 
-                        // Caso podcast esteja pausado
+                        // Caso podcast não esteja tocando
                         if (((Button)view).getText() == "Ouvir") {
 
                             // Caso podcast não tenha começado
@@ -148,11 +148,21 @@ public class ItemFeedAdapter extends ArrayAdapter<ItemFeed> {
                             ((Button)view).setBackgroundColor(Color.GRAY);
                         }
 
+                        else if (((Button)view).getText() == "Continuar") {
+                            // Tocar podcast
+                            holder.media_player.start();
+                            ((Button)view).setText("Pausar");
+                            ((Button)view).setBackgroundColor(Color.GRAY);
+                        }
+
                         else if (((Button)view).getText() == "Pausar") {
                             // Pausar podcast
                             holder.media_player.pause();
-                            ((Button)view).setText("Ouvir");
+                            ((Button)view).setText("Continuar");
                             ((Button)view).setBackgroundColor(Color.GREEN);
+
+                            // Salvar momento do podcast pausado
+
                         }
                     }
                 }
