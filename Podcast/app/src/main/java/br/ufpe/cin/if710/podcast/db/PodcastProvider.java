@@ -33,13 +33,14 @@ public class PodcastProvider extends ContentProvider {
     public Uri insert(Uri uri, ContentValues cv) {
         // Responsável por inserir itens no banco de dados
         if (isEpisodeUri(uri)) {
-//            long id = db.getWritableDatabase().insert(PodcastDBHelper.DATABASE_TABLE, null, cv);
-            int id = (int) db.getWritableDatabase().insertWithOnConflict(PodcastDBHelper.DATABASE_TABLE, null, cv, SQLiteDatabase.CONFLICT_IGNORE);
-            if (id == -1) {
-                String selection = PodcastProviderContract.EPISODE_LINK + " = ?";
-                String[] selection_args = new String[]{cv.getAsString(PodcastDBHelper.EPISODE_LINK)};
-                db.getWritableDatabase().update(PodcastDBHelper.DATABASE_TABLE, cv, selection, selection_args);
-            }
+            long id = db.getWritableDatabase().insert(PodcastDBHelper.DATABASE_TABLE, null, cv);
+//            int id = (int) db.getWritableDatabase().insertWithOnConflict(PodcastDBHelper.DATABASE_TABLE, null, cv, SQLiteDatabase.CONFLICT_IGNORE);
+//            if (id == -1) {
+//                if (!(cv.getAsString(PodcastDBHelper.EPISODE_FILE_URI)).equals("NONE")) {
+//                String selection = PodcastProviderContract.EPISODE_LINK + " = ?";
+//                String[] selection_args = new String[]{cv.getAsString(PodcastDBHelper.EPISODE_LINK)};
+//                db.getWritableDatabase().update(PodcastDBHelper.DATABASE_TABLE, cv, selection, selection_args);
+//            }
             return Uri.withAppendedPath(PodcastProviderContract.EPISODE_LIST_URI, Long.toString(id));
         }
         else {
