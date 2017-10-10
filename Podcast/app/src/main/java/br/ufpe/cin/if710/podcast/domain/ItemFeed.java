@@ -9,6 +9,7 @@ public class ItemFeed implements Serializable {
     private final String description;
     private final String downloadLink;
     private String uri;
+    private int podcastCurrentTime;
 
     public ItemFeed(String title, String link, String pubDate, String description, String downloadLink) {
         this.title = title;
@@ -17,6 +18,7 @@ public class ItemFeed implements Serializable {
         this.description = description;
         this.downloadLink = downloadLink;
         this.uri = "NONE";
+        this.podcastCurrentTime = 0;
     }
 
     public ItemFeed(String title, String link, String pubDate, String description, String downloadLink, String uri) {
@@ -26,6 +28,17 @@ public class ItemFeed implements Serializable {
         this.description = description;
         this.downloadLink = downloadLink;
         this.uri = uri;
+        this.podcastCurrentTime = 0;
+    }
+
+    public ItemFeed(String title, String link, String pubDate, String description, String downloadLink, String uri, int podcastCurrentTime) {
+        this.title = title;
+        this.link = link;
+        this.pubDate = pubDate;
+        this.description = description;
+        this.downloadLink = downloadLink;
+        this.uri = uri;
+        this.podcastCurrentTime = podcastCurrentTime;
     }
 
     public String getTitle() {
@@ -53,6 +66,10 @@ public class ItemFeed implements Serializable {
     }
 
     public void setUri(String uri) { this.uri = uri; }
+
+    public int getPodcastCurrentTime() { return podcastCurrentTime; }
+
+    public void setPodcastCurrentTime(int podcastCurrentTime) { this.podcastCurrentTime = podcastCurrentTime; }
 
     @Override
     public String toString() {

@@ -5,6 +5,8 @@ package br.ufpe.cin.if710.podcast.ui.adapter;
  */
 
 import java.util.List;
+
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -22,6 +24,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import br.ufpe.cin.if710.podcast.R;
+import br.ufpe.cin.if710.podcast.db.PodcastDBHelper;
+import br.ufpe.cin.if710.podcast.db.PodcastProvider;
+import br.ufpe.cin.if710.podcast.db.PodcastProviderContract;
 import br.ufpe.cin.if710.podcast.domain.ItemFeed;
 import br.ufpe.cin.if710.podcast.service.DownloadPodcastService;
 import br.ufpe.cin.if710.podcast.ui.EpisodeDetailActivity;
@@ -29,6 +34,7 @@ import br.ufpe.cin.if710.podcast.ui.EpisodeDetailActivity;
 public class ItemFeedAdapter extends ArrayAdapter<ItemFeed> {
 
     int linkResource;
+    PodcastProvider pp;
 
     public boolean internetConnection(Context c) {
         // Checa se há conexão com a internet (não há teste de ping)
@@ -92,10 +98,14 @@ public class ItemFeedAdapter extends ArrayAdapter<ItemFeed> {
             // Caso tal item já tenha sido baixado, dar o play
             holder.itemButton = convertView.findViewById(R.id.item_action);
 
-            Log.d("getUri", currentItem.getUri());
             if (!(currentItem.getUri()).equals("NONE")) {
                 holder.itemButton.setEnabled(true);
-                holder.itemButton.setText("Ouvir");
+                if (currentItem.getPodcastCurrentTime() == 0) {
+                    holder.itemButton.setText("Ouvir");
+                }
+                else {
+                    holder.itemButton.setText("Continuar");
+                }
                 holder.itemButton.setBackgroundColor(Color.GREEN);
             }
             else {
@@ -106,10 +116,10 @@ public class ItemFeedAdapter extends ArrayAdapter<ItemFeed> {
             holder.itemButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(final View view) {
+                    final Context context = getContext();
                     // Realizar download do item, caso não tenha sido feito ainda (indicado pelo URI)
                     if ((currentItem.getUri()).equals("NONE")) {
                         String item_download_link = currentItem.getDownloadLink();
-                        Context context = getContext();
                         if (internetConnection(context)) {
                             Intent download_podcast_service = new Intent(context, DownloadPodcastService.class);
                             download_podcast_service.putExtra("item", currentItem);
@@ -149,7 +159,26 @@ public class ItemFeedAdapter extends ArrayAdapter<ItemFeed> {
                         }
 
                         else if (((Button)view).getText() == "Continuar") {
+                            // Caso podcast não tenha começado
+                            if (holder.media_player == null) {
+                                holder.media_player = MediaPlayer.create(getContext(), item_uri);
+                                holder.media_player.setLooping(false);
+                                holder.media_player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                                    public void onCompletion(MediaPlayer mp) {
+                                        ((Button)view).setText("Ouvir");
+                                        ((Button)view).setBackgroundColor(Color.GREEN);
+
+                                        // Zerar tempo do áudio do podcast baixado (no banco de dados)
+                                        ContentValues cv = new ContentValues();
+                                        cv.put(PodcastDBHelper.EPISODE_CURRENT_TIME, "0");
+                                        String selection = PodcastProviderContract.EPISODE_LINK + " = ?";
+                                        String[] selection_args = new String[]{currentItem.getLink()};
+                                        context.getContentResolver().update(PodcastProviderContract.EPISODE_LIST_URI, cv, selection, selection_args);
+                                    }
+                                });
+                            }
                             // Tocar podcast
+                            holder.media_player.seekTo(currentItem.getPodcastCurrentTime());
                             holder.media_player.start();
                             ((Button)view).setText("Pausar");
                             ((Button)view).setBackgroundColor(Color.GRAY);
@@ -161,8 +190,15 @@ public class ItemFeedAdapter extends ArrayAdapter<ItemFeed> {
                             ((Button)view).setText("Continuar");
                             ((Button)view).setBackgroundColor(Color.GREEN);
 
-                            // Salvar momento do podcast pausado
+                            // Salvar no banco de dados o momento do podcast pausado
+                            currentItem.setPodcastCurrentTime(holder.media_player.getCurrentPosition());
 
+                            // Atualizar tempo do áudio do podcast baixado (no banco de dados)
+                            ContentValues cv = new ContentValues();
+                            cv.put(PodcastDBHelper.EPISODE_CURRENT_TIME, "" + currentItem.getPodcastCurrentTime());
+                            String selection = PodcastProviderContract.EPISODE_LINK + " = ?";
+                            String[] selection_args = new String[]{currentItem.getLink()};
+                            context.getContentResolver().update(PodcastProviderContract.EPISODE_LIST_URI, cv, selection, selection_args);
                         }
                     }
                 }

@@ -203,7 +203,6 @@ public class MainActivity extends Activity {
                     PodcastProviderContract.EPISODE_LIST_URI,
                     null, "", null, null
             );
-            int count = 0;
             while (queryCursor.moveToNext()) {
                 String item_title = queryCursor.getString(queryCursor.getColumnIndex(PodcastProviderContract.TITLE));
                 String item_link = queryCursor.getString(queryCursor.getColumnIndex(PodcastProviderContract.EPISODE_LINK));
@@ -211,10 +210,10 @@ public class MainActivity extends Activity {
                 String item_description = queryCursor.getString(queryCursor.getColumnIndex(PodcastProviderContract.DESCRIPTION));
                 String item_download_link = queryCursor.getString(queryCursor.getColumnIndex(PodcastProviderContract.DOWNLOAD_LINK));
                 String item_uri = queryCursor.getString(queryCursor.getColumnIndex(PodcastProviderContract.EPISODE_URI));
-                count++;
-                itemList.add(new ItemFeed(item_title, item_link, item_date, item_description, item_download_link, item_uri));
+                int item_current_time = Integer.parseInt(queryCursor.getString(queryCursor.getColumnIndex(PodcastProviderContract.EPISODE_CURRENT_TIME)));
+
+                itemList.add(new ItemFeed(item_title, item_link, item_date, item_description, item_download_link, item_uri, item_current_time));
             }
-            Log.d("count", "" + count);
 
             return itemList;
         }
