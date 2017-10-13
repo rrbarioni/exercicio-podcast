@@ -4,6 +4,7 @@ package br.ufpe.cin.if710.podcast.ui.adapter;
  * Created by leopoldomt on 9/19/17.
  */
 
+import java.io.File;
 import java.util.List;
 
 import android.content.ContentValues;
@@ -147,8 +148,21 @@ public class ItemFeedAdapter extends ArrayAdapter<ItemFeed> {
                                 holder.media_player.setLooping(false);
                                 holder.media_player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                                     public void onCompletion(MediaPlayer mp) {
-                                        ((Button)view).setText("Ouvir");
-                                        ((Button)view).setBackgroundColor(Color.GREEN);
+//                                        ((Button)view).setText("Ouvir");
+//                                        ((Button)view).setBackgroundColor(Color.GREEN);
+                                        ((Button)view).setText("Baixar");
+                                        ((Button)view).setBackgroundColor(Color.RED);
+
+                                        // Deletar arquivo de podcast do banco
+                                        new File(currentItem.getUri()).delete();
+
+                                        // Zerar tempo do áudio do podcast baixado (no banco de dados)
+                                        ContentValues cv = new ContentValues();
+                                        cv.put(PodcastDBHelper.EPISODE_CURRENT_TIME, "0");
+                                        cv.put(PodcastDBHelper.EPISODE_FILE_URI, "NONE");
+                                        String selection = PodcastProviderContract.EPISODE_LINK + " = ?";
+                                        String[] selection_args = new String[]{currentItem.getLink()};
+                                        context.getContentResolver().update(PodcastProviderContract.EPISODE_LIST_URI, cv, selection, selection_args);
                                     }
                                 });
                             }
@@ -165,12 +179,18 @@ public class ItemFeedAdapter extends ArrayAdapter<ItemFeed> {
                                 holder.media_player.setLooping(false);
                                 holder.media_player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                                     public void onCompletion(MediaPlayer mp) {
-                                        ((Button)view).setText("Ouvir");
-                                        ((Button)view).setBackgroundColor(Color.GREEN);
+//                                        ((Button)view).setText("Ouvir");
+//                                        ((Button)view).setBackgroundColor(Color.GREEN);
+                                        ((Button)view).setText("Baixar");
+                                        ((Button)view).setBackgroundColor(Color.RED);
+
+                                        // Deletar arquivo de podcast do banco
+                                        new File(currentItem.getUri()).delete();
 
                                         // Zerar tempo do áudio do podcast baixado (no banco de dados)
                                         ContentValues cv = new ContentValues();
                                         cv.put(PodcastDBHelper.EPISODE_CURRENT_TIME, "0");
+                                        cv.put(PodcastDBHelper.EPISODE_FILE_URI, "NONE");
                                         String selection = PodcastProviderContract.EPISODE_LINK + " = ?";
                                         String[] selection_args = new String[]{currentItem.getLink()};
                                         context.getContentResolver().update(PodcastProviderContract.EPISODE_LIST_URI, cv, selection, selection_args);
