@@ -58,9 +58,9 @@ public class MainActivity extends Activity {
             Manifest.permission.WRITE_EXTERNAL_STORAGE
     };
 
-//    private final String RSS_FEED = "http://leopoldomt.com/if710/fronteirasdaciencia.xml";
+    private final String RSS_FEED = "http://leopoldomt.com/if710/fronteirasdaciencia.xml";
     //TODO teste com outros links de podcast
-    private final String RSS_FEED = "https://hpbl.github.io/hub42_APS/audio/xml_reduzido.xml";
+//    private final String RSS_FEED = "https://hpbl.github.io/hub42_APS/audio/xml_reduzido.xml";
 
     private ListView items;
     private Button selectedButton;
@@ -126,7 +126,9 @@ public class MainActivity extends Activity {
     protected void onStop() {
         super.onStop();
         ItemFeedAdapter adapter = (ItemFeedAdapter) items.getAdapter();
-        adapter.clear();
+        if (adapter != null) {
+            adapter.clear();
+        }
     }
 
     public boolean internetConnection(Context c) {
@@ -236,8 +238,8 @@ public class MainActivity extends Activity {
         String rssFeed = "";
         try {
             URL url = new URL(feed);
-//            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+//            HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
             in = conn.getInputStream();
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             byte[] buffer = new byte[1024];

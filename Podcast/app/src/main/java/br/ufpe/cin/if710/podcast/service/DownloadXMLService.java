@@ -69,8 +69,8 @@ public class DownloadXMLService extends IntentService {
         String rssFeed = "";
         try {
             URL url = new URL(feed);
-//            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+//            HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
             in = conn.getInputStream();
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             byte[] buffer = new byte[1024];

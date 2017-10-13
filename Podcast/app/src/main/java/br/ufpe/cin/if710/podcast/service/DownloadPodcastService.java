@@ -65,8 +65,8 @@ public class DownloadPodcastService extends IntentService {
 
                 // Conexão
                 URL url = new URL(i.getData().toString());
-//                HttpURLConnection c = (HttpURLConnection) url.openConnection();
-                HttpsURLConnection c = (HttpsURLConnection) url.openConnection();
+                HttpURLConnection c = (HttpURLConnection) url.openConnection();
+//                HttpsURLConnection c = (HttpsURLConnection) url.openConnection();
                 FileOutputStream fos = new FileOutputStream(file_output.getPath());
                 BufferedOutputStream out = new BufferedOutputStream(fos);
                 Log.d("start podcast service", "FileOutputStream");
