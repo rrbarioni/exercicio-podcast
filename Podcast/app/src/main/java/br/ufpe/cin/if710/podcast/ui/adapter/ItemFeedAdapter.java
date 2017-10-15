@@ -99,7 +99,13 @@ public class ItemFeedAdapter extends ArrayAdapter<ItemFeed> {
             // Caso tal item já tenha sido baixado, dar o play
             holder.itemButton = convertView.findViewById(R.id.item_action);
 
-            if (!(currentItem.getUri()).equals("NONE")) {
+            if ((currentItem.getUri()).equals("DOWNLOADING")) {
+                holder.itemButton.setEnabled(false);
+                holder.itemButton.setText("Baixando");
+                holder.itemButton.setBackgroundColor(Color.BLUE);
+            }
+
+            else if (!(currentItem.getUri()).equals("NONE")) {
                 holder.itemButton.setEnabled(true);
                 if (currentItem.getPodcastCurrentTime() == 0) {
                     holder.itemButton.setText("Ouvir");
@@ -128,6 +134,14 @@ public class ItemFeedAdapter extends ArrayAdapter<ItemFeed> {
                             ((Button)view).setEnabled(false);
                             ((Button)view).setText("Baixando");
                             ((Button)view).setBackgroundColor(Color.BLUE);
+
+                            // Deixar salvo no banco de dados que tal podcast está sendo baixado
+                            ContentValues cv = new ContentValues();
+                            cv.put(PodcastDBHelper.EPISODE_FILE_URI, "DOWNLOADING");
+                            String selection = PodcastProviderContract.EPISODE_LINK + " = ?";
+                            String[] selection_args = new String[]{currentItem.getLink()};
+                            context.getContentResolver().update(PodcastProviderContract.EPISODE_LIST_URI, cv, selection, selection_args);
+
                             context.startService(download_podcast_service);
                         }
                         else {

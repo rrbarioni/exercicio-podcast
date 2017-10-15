@@ -2,6 +2,9 @@ package br.ufpe.cin.if710.podcast.ui;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -232,34 +235,51 @@ public class MainActivity extends Activity {
         }
     }
 
-    //TODO Opcional - pesquise outros meios de obter arquivos da internet
-    private String getRssFeed(String feed) throws IOException {
-        InputStream in = null;
-        String rssFeed = "";
-        try {
-            URL url = new URL(feed);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-//            HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
-            in = conn.getInputStream();
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            byte[] buffer = new byte[1024];
-            for (int count; (count = in.read(buffer)) != -1; ) {
-                out.write(buffer, 0, count);
-            }
-            byte[] response = out.toByteArray();
-            rssFeed = new String(response, "UTF-8");
-        } finally {
-            if (in != null) {
-                in.close();
-            }
-        }
-        return rssFeed;
-    }
+//    //TODO Opcional - pesquise outros meios de obter arquivos da internet
+//    private String getRssFeed(String feed) throws IOException {
+//        InputStream in = null;
+//        String rssFeed = "";
+//        try {
+//            URL url = new URL(feed);
+//            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+////            HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
+//            in = conn.getInputStream();
+//            ByteArrayOutputStream out = new ByteArrayOutputStream();
+//            byte[] buffer = new byte[1024];
+//            for (int count; (count = in.read(buffer)) != -1; ) {
+//                out.write(buffer, 0, count);
+//            }
+//            byte[] response = out.toByteArray();
+//            rssFeed = new String(response, "UTF-8");
+//        } finally {
+//            if (in != null) {
+//                in.close();
+//            }
+//        }
+//        return rssFeed;
+//    }
 
     private BroadcastReceiver onDownloadXMLEvent = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
-            // Chamado quando o DownloadXMLService retorna com o XML baixado e colocado no banco de dados
-            Toast.makeText(getApplicationContext(), "Itens carregados do XML pelo service", Toast.LENGTH_SHORT).show();
+            // Notificar usuário quando o DownloadXMLService retorna com o XML baixado e colocado no banco de dados
+            if (MainActivity.this.getWindow().getDecorView().getRootView().isShown()) {
+                Toast.makeText(getApplicationContext(), "Itens carregados do XML pelo service", Toast.LENGTH_SHORT).show();
+            }
+            else {
+                final Intent notificationIntent = new Intent(context, MainActivity.class);
+                final PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, notificationIntent, 0);
+
+                final Notification notification = new Notification.Builder(
+                        getApplicationContext())
+                        .setSmallIcon(android.R.drawable.alert_light_frame)
+                        .setAutoCancel(true)
+                        .setOngoing(true).setContentTitle("Lista de Podcasts obtido!")
+                        .setContentIntent(pendingIntent)
+                        .build();
+
+                NotificationManager notificationManager = (NotificationManager) getApplicationContext().getSystemService(NOTIFICATION_SERVICE);
+                notificationManager.notify(1, notification);
+            }
 
             // Carregar view com os dados do banco
             new GetFromDatabaseTask().execute();
